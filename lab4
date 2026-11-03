@@ -1,0 +1,29 @@
+# Завдання 1. Робота з числами
+
+with open("F1.txt", "w") as file:
+    file.write("5 -3 8 -7 10 -2 4 -9 6")
+
+with open("F1.txt", "r") as file:
+    numbers = list(map(int, file.read().split()))
+
+with open("F2.txt", "w") as file:
+    for i, num in enumerate(numbers):
+        if i % 2 == 0 and num < 0:
+            file.write(str(num) + "\n")
+
+
+# Завдання 2. Робота з рядками
+
+with open("text.txt", "w", encoding="utf-8") as file:
+    file.write("Перший рядок\nДругий рядок\nТретій рядок\nЧетвертий рядок")
+
+with open("text.txt", "r", encoding="utf-8") as file:
+    lines = file.readlines()
+
+with open("normal.txt", "w", encoding="utf-8") as file:
+    file.writelines(lines)
+
+with open("reverse.txt", "w", encoding="utf-8") as file:
+    file.writelines(lines[::-1])
+
+print("Обидва завдання виконано!")
