@@ -1,29 +1,93 @@
-# Завдання 1. Робота з числами
+import time
+import random
+from functools import wraps
 
-with open("F1.txt", "w") as file:
-    file.write("5 -3 8 -7 10 -2 4 -9 6")
+# ЗАВДАННЯ 1: Декоратор @retry 
 
-with open("F1.txt", "r") as file:
-    numbers = list(map(int, file.read().split()))
+def retry(attempts, delay):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            for attempt in range(1, attempts + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    if attempt == attempts:
+                        raise
+                    time.sleep(delay)
+        return wrapper
+    return decorator
 
-with open("F2.txt", "w") as file:
-    for i, num in enumerate(numbers):
-        if i % 2 == 0 and num < 0:
-            file.write(str(num) + "\n")
+@retry(attempts=3, delay=0.5)
+def fetch_data_from_flaky_service():
+    if random.random() < 0.7:  # 70% ймовірність збою[cite: 1]
+        raise ConnectionError("Service is unavailable")
+    return {"data": "some value"}
+
+def run_task_1():
+    print("\n--- Виконання Завдання 1: Декоратор @retry ---")
+    try:
+        result = fetch_data_from_flaky_service()
+        print("Успішно отримано дані:", result)
+    except Exception as e:
+        print(f"Остаточна помилка після всіх спроб: {e}")
 
 
-# Завдання 2. Робота з рядками
+#  ЗАВДАННЯ 2: Рекурсивне згортання дерева 
 
-with open("text.txt", "w", encoding="utf-8") as file:
-    file.write("Перший рядок\nДругий рядок\nТретій рядок\nЧетвертий рядок")
+def fold_tree(accumulator, tree, initial_value):
+    acc = initial_value
+    
+    if isinstance(tree, dict):
+        if 'value' in tree:
+            acc = accumulator(acc, tree['value'])
+        
+        if 'children' in tree:
+            for child in tree['children']:
+                acc = fold_tree(accumulator, child, acc)
+                
+    return acc
 
-with open("text.txt", "r", encoding="utf-8") as file:
-    lines = file.readlines()
+def run_task_2():
+    print("\n--- Виконання Завдання 2: Рекурсивне згортання дерева ---")
+    tree = {
+        'value': 10,
+        'children': [
+            {'value': 5, 'children': []},
+            {'value': 15, 'children': [{'value': 8, 'children': []}]}
+        ]
+    }
+    
+    # Знайти суму всіх значень[cite: 2]
+    total_sum = fold_tree(lambda acc, value: acc + value, tree, 0)
+    print(f"Дерево: {tree}")
+    print(f"Сума всіх значень (initial=0): {total_sum}")  # Очікується 38[cite: 2]
+    
+    # Знайти добуток[cite: 2]
+    product = fold_tree(lambda acc, value: acc * value, tree, 1)
+    print(f"Добуток всіх значень (initial=1): {product}")  # Очікується 6000[cite: 2]
 
-with open("normal.txt", "w", encoding="utf-8") as file:
-    file.writelines(lines)
 
-with open("reverse.txt", "w", encoding="utf-8") as file:
-    file.writelines(lines[::-1])
+#  КОНСОЛЬНЕ МЕНЮ 
 
-print("Обидва завдання виконано!")
+def main_menu():
+    while True:
+        print("\n ГОЛОВНЕ МЕНЮ ")
+        print("1. Завдання 1: Декоратор @retry")
+        print("2. Завдання 2: Рекурсивне згортання дерева (fold_tree)")
+        print("0. Вихід")
+        
+        choice = input("Оберіть номер завдання (0-2): ").strip()
+        
+        if choice == '1':
+            run_task_1()
+        elif choice == '2':
+            run_task_2()
+        elif choice == '0':
+            print("Вихід з програми. До побачення!")
+            break
+        else:
+            print("Помилка: невірний вибір. Будь ласка, введіть 1, 2 або 0.")
+
+if name == "main":
+    main_menu()
