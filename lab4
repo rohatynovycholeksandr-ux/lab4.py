@@ -1,93 +1,66 @@
-import time
-import random
-from functools import wraps
+import numpy as np
+import matplotlib.pyplot as plt
+from collections import Counter
+import re
 
-# ЗАВДАННЯ 1: Декоратор @retry 
+# Завдання 1. Графік функції
+x = np.linspace(0, 4, 500)
+y = 5 * np.sin(10 * x) * np.sin(3 * x)
 
-def retry(attempts, delay):
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            for attempt in range(1, attempts + 1):
-                try:
-                    return func(*args, **kwargs)
-                except Exception as e:
-                    if attempt == attempts:
-                        raise
-                    time.sleep(delay)
-        return wrapper
-    return decorator
+plt.plot(x, y, color="blue")
+plt.title("Y(x) = 5 sin(10x) sin(3x)")
+plt.xlabel("x")
+plt.ylabel("Y(x)")
+plt.grid()
+plt.savefig("graph.png")
+plt.show()
 
-@retry(attempts=3, delay=0.5)
-def fetch_data_from_flaky_service():
-    if random.random() < 0.7:  # 70% ймовірність збою[cite: 1]
-        raise ConnectionError("Service is unavailable")
-    return {"data": "some value"}
+# Текст для завдань 2 і 3
+text = """
+Python є популярною мовою програмування.
+Чи легко вивчати Python? Так, це цікаво!
+Програмування відкриває нові можливості...
+Matplotlib допомагає будувати графіки.
+"""
 
-def run_task_1():
-    print("\n--- Виконання Завдання 1: Декоратор @retry ---")
-    try:
-        result = fetch_data_from_flaky_service()
-        print("Успішно отримано дані:", result)
-    except Exception as e:
-        print(f"Остаточна помилка після всіх спроб: {e}")
+# Завдання 2. Частота появи літер
+letters = Counter(c.lower() for c in text if c.isalpha())
 
+plt.bar(letters.keys(), letters.values(), color="green")
+plt.title("Частота появи літер")
+plt.xlabel("Літери")
+plt.ylabel("Кількість")
+plt.grid(axis="y")
+plt.savefig("letters.png")
+plt.show()
 
-#  ЗАВДАННЯ 2: Рекурсивне згортання дерева 
+# Завдання 3. Типи речень
+sentences = re.split(r'(?<=[.!?…])\s+', text.strip())
 
-def fold_tree(accumulator, tree, initial_value):
-    acc = initial_value
-    
-    if isinstance(tree, dict):
-        if 'value' in tree:
-            acc = accumulator(acc, tree['value'])
-        
-        if 'children' in tree:
-            for child in tree['children']:
-                acc = fold_tree(accumulator, child, acc)
-                
-    return acc
+types = {
+    "Звичайні": 0,
+    "Питальні": 0,
+    "Окличні": 0,
+    "Трикрапка": 0
+}
 
-def run_task_2():
-    print("\n--- Виконання Завдання 2: Рекурсивне згортання дерева ---")
-    tree = {
-        'value': 10,
-        'children': [
-            {'value': 5, 'children': []},
-            {'value': 15, 'children': [{'value': 8, 'children': []}]}
-        ]
-    }
-    
-    # Знайти суму всіх значень[cite: 2]
-    total_sum = fold_tree(lambda acc, value: acc + value, tree, 0)
-    print(f"Дерево: {tree}")
-    print(f"Сума всіх значень (initial=0): {total_sum}")  # Очікується 38[cite: 2]
-    
-    # Знайти добуток[cite: 2]
-    product = fold_tree(lambda acc, value: acc * value, tree, 1)
-    print(f"Добуток всіх значень (initial=1): {product}")  # Очікується 6000[cite: 2]
+for sentence in sentences:
+    sentence = sentence.strip()
+    if not sentence:
+        continue
+    if sentence.endswith("...") or sentence.endswith("…"):
+        types["Трикрапка"] += 1
+    elif sentence.endswith("?"):
+        types["Питальні"] += 1
+    elif sentence.endswith("!"):
+        types["Окличні"] += 1
+    else:
+        types["Звичайні"] += 1
 
-
-#  КОНСОЛЬНЕ МЕНЮ 
-
-def main_menu():
-    while True:
-        print("\n ГОЛОВНЕ МЕНЮ ")
-        print("1. Завдання 1: Декоратор @retry")
-        print("2. Завдання 2: Рекурсивне згортання дерева (fold_tree)")
-        print("0. Вихід")
-        
-        choice = input("Оберіть номер завдання (0-2): ").strip()
-        
-        if choice == '1':
-            run_task_1()
-        elif choice == '2':
-            run_task_2()
-        elif choice == '0':
-            print("Вихід з програми. До побачення!")
-            break
-        else:
-            print("Помилка: невірний вибір. Будь ласка, введіть 1, 2 або 0.")
-
-if name == "main":
-    main_menu()
+plt.bar(types.keys(), types.values(), color="orange")
+plt.title("Кількість різних типів речень")
+plt.xlabel("Тип речення")
+plt.ylabel("Кількість")
+plt.grid(axis="y")
+plt.savefig("sentences.png")
+plt.show()
